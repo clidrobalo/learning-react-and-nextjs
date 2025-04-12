@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"; // Importing zodResolver 
 
 const schema = z.object({
   name: z.string().min(3), // Name must be a string with a minimum length of 3
-  password: z.string(), // Password must be a string
+  password: z.string().min(6), // Password must be a string
 });
 
 type LoginForm = z.infer<typeof schema>;
@@ -14,7 +14,7 @@ const Form = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<LoginForm>({ resolver: zodResolver(schema) }); // Initialize react-hook-form for form handling
 
   const onSubmit = (data: FieldValues) => {
@@ -52,7 +52,7 @@ const Form = () => {
         )}
       </div>
 
-      <button className="btn btn-primary" type="submit">
+      <button disabled={!isValid} className="btn btn-primary" type="submit">
         Login
       </button>
     </form>
