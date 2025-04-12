@@ -10,23 +10,28 @@ interface User {
 function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
 
+    setLoading(true);
     axios
       .get("https://jsonplaceholder.typicode.com/users", {
         cancelToken: cancelToken.token,
       })
       .then((response) => {
         setUsers(response.data);
+        setLoading(false);
       })
       .catch((error) => {
         if (error instanceof axios.Cancel) {
           console.log("Request canceled", error.message);
+          setError(null);
           return;
         }
 
+        setLoading(false);
         console.error("Error fetching users:", error);
         setError(
           "Failed to fetch users, status code: " + error.response?.status
@@ -47,26 +52,26 @@ function App() {
 
       {error && <div className="alert alert-danger">{error}</div>}
 
-      {users.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
+      {loading && <div className="spinner-border">Loading...</div>}
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td>{user.id}</td>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
             </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
