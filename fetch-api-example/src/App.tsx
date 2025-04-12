@@ -63,15 +63,44 @@ function App() {
       });
   }
 
+  const addUser = () => {
+    const newUser = {
+      id: users.length + 1,
+      name: "New User",
+      email: "newuser@gmail.com",
+    };
+
+    setUsers((prevUsers) => [...prevUsers, newUser]);
+
+    setLoading(true);
+    axios
+      .post("https://jsonplaceholder.typicode.com/users", newUser)
+      .then((response) => {
+        console.log("User added successfully", response.data);
+        setUsers((prevUsers) => [...prevUsers, response.data]);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error adding user:", error);
+        setError("Failed to add user, status code: " + error.response?.status);
+        setLoading(false);
+      });
+  };
+
   return (
     <div className="container p-5">
-      <h1>API Fetch</h1>
-
-      <h2>Users</h2>
+      <h1>Users</h1>
 
       {error && <div className="alert alert-danger">{error}</div>}
 
       {loading && <div className="spinner-border">Loading...</div>}
+      <button
+        className="btn btn-primary mb-3"
+        onClick={addUser}
+        disabled={loading}
+      >
+        {loading ? "Processing..." : "Add User"}
+      </button>
 
       <table>
         <thead>
