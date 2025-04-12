@@ -44,6 +44,25 @@ function App() {
     };
   }, []);
 
+  function onDelete(id: number) {
+    setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+
+    setLoading(true);
+    axios
+      .delete(`https://jsonplaceholder.typicode.com/users/${id}`)
+      .then(() => {
+        console.log("User deleted successfully");
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error deleting user:", error);
+        setError(
+          "Failed to delete user, status code: " + error.response?.status
+        );
+        setLoading(false);
+      });
+  }
+
   return (
     <div className="container p-5">
       <h1>API Fetch</h1>
@@ -60,6 +79,7 @@ function App() {
             <th>ID</th>
             <th>Name</th>
             <th>Email</th>
+            <th>Operation</th>
           </tr>
         </thead>
         <tbody>
@@ -68,6 +88,14 @@ function App() {
               <td>{user.id}</td>
               <td>{user.name}</td>
               <td>{user.email}</td>
+              <td>
+                <button
+                  className="btn btn-outline-danger"
+                  onClick={() => onDelete(user.id)}
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
