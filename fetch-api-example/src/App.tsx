@@ -12,17 +12,31 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
+
     axios
-      .get("https://jsonplaceholder.typicode.com/users")
+      .get("https://jsonplaceholder.typicode.com/users", {
+        cancelToken: cancelToken.token,
+      })
       .then((response) => {
         setUsers(response.data);
       })
       .catch((error) => {
+        if (error instanceof axios.Cancel) {
+          console.log("Request canceled", error.message);
+          return;
+        }
+
         console.error("Error fetching users:", error);
         setError(
           "Failed to fetch users, status code: " + error.response?.status
         );
       });
+
+    return () => {
+      // Cancel the request if the component unmounts
+      cancelToken.cancel("Request canceled by cleanup function");
+    };
   }, []);
 
   return (
