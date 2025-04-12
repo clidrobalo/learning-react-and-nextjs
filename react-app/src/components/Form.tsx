@@ -1,17 +1,21 @@
 // import { useRef } from "react";
 import { FieldValues, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod"; // Importing zodResolver for schema validation
 
-interface loginForm {
-  name: string; // Name field
-  password: string; // Password field
-}
+const schema = z.object({
+  name: z.string().min(3), // Name must be a string with a minimum length of 3
+  password: z.string(), // Password must be a string
+});
+
+type LoginForm = z.infer<typeof schema>;
 
 const Form = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<loginForm>(); // Initialize react-hook-form for form handling
+  } = useForm<LoginForm>({ resolver: zodResolver(schema) }); // Initialize react-hook-form for form handling
 
   const onSubmit = (data: FieldValues) => {
     console.log(errors);
@@ -25,19 +29,12 @@ const Form = () => {
           Name
         </label>
         <input
-          {...register("name", { required: true, minLength: 3 })}
+          {...register("name")}
           id="name"
           type="text"
           className="form-control"
         />
-        {errors.name?.type === "required" && (
-          <p className="text-danger">The name field is required</p>
-        )}
-        {errors.name?.type === "minLength" && (
-          <p className="text-danger">
-            The name field must be at least 3 characters
-          </p>
-        )}
+        {errors.name && <p className="text-danger">{errors.name.message}</p>}
       </div>
 
       <div className="mb-3">
@@ -50,6 +47,9 @@ const Form = () => {
           type="password"
           className="form-control"
         />
+        {errors.password && (
+          <p className="text-danger">{errors.password.message}</p>
+        )}
       </div>
 
       <button className="btn btn-primary" type="submit">
